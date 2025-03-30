@@ -18,6 +18,12 @@ ament_auto_find_build_dependencies()
 find_package(glim REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options)
 
+
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+
 if(BUILD_WITH_CV_BRIDGE)
   add_definitions(-DBUILD_WITH_CV_BRIDGE)
 endif()

@@ -1,0 +1,30 @@
+<launch>
+	<arg name="bagfile" default="new/new.db3" description="ROS2 Bag file for testing clustering"/>
+	<executable cmd="ros2 bag play $(var bagfile) --clock --loop"/>
+	<executable cmd="rviz2 -d default.rviz"/>
+
+	<node pkg="tf2_ros" exec="static_transform_publisher" name="imu2base_link" args="0 0 0 0 0 0 base_link imu"/>	
+	<node pkg="tf2_ros" exec="static_transform_publisher" name="lidar2camera" args="0.31543887825520345 0.148714404818862 -0.17567234441123297 -0.473 0.491865 -0.5158533 0.517846 imu world"/>
+
+	<node pkg="perception_py" exec="perception" name="perception_yolo">
+		<param name="model" value="custom.pt"/>
+		<param name="input_topic" value="/usb_cam/image_raw"/>
+		<param name="result_topic" value="/perception/result"/>
+		<param name="result_iamge_topic" value="/perception/image_raw"/>
+		<param name="conf_thres" value="0.8"/>
+		<param name="iou_thres" value="0.45"/>
+		<param name="max_det" value="300"/>
+    		<!-- mps on Mac, cuda on the other -->
+    		<param name="device" value="cuda"/>
+	</node>
+
+	<node pkg="clustering_cxx" exec="clustering" name="clustering_cone">
+		<param name="lidar_topic" value="/ouster/points"/>
+		<param name="min_core_points" value="1"/>
+		<param name="min_cluster_points" value="1"/>
+		<param name="max_cluster_points" value="10"/>
+		<param name="tolerance" value="0.7"/>
+	</node>
+
+	<node pkg="glim_ros" exec="glim_rosnode" name="glim_rosnode" output="screen"/>
+</launch>
